@@ -1,19 +1,30 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { UserTable } from "./user/components/UserTable";
 import { Login } from "./login/components/Login";
+import {ListUser} from "./user/components/ListUser"
 import { isUserAuthenticated } from "./login/helpers/LoginHelper";
 import { NavBar } from "./components/NavBar";
+import { CreateUser } from "./user/components/CreateUser";
 
 export const AppRouter = () => {
   return (
     <>
-      <NavBar></NavBar>
+      {isUserAuthenticated() && <NavBar></NavBar>}
       <Routes>
         <Route
           path="/"
           element={
             isUserAuthenticated() ? (
-              <UserTable />
+              <ListUser />
+            ) : (
+              <Navigate to="/login"></Navigate>
+            )
+          }
+        ></Route>
+        <Route
+          path="/agregate"
+          element={
+            isUserAuthenticated() ? (
+              <CreateUser />
             ) : (
               <Navigate to="/login"></Navigate>
             )

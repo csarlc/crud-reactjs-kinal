@@ -1,18 +1,50 @@
 import React, { useEffect, useState } from "react";
-import { listUserApi } from "../api/UserApi";
+import { DeleteUSer, listUserApi } from "../api/UserApi";
+import Swal from "sweetalert2";
+import { User } from "../models/ModelUser";
+import { UpdateUser } from "./UpdateUser";
 
-export const UserTable = () => {
+export const ListUser = () => {
   const [users, setUsers] = useState([]);
+  const [user, setUser] = useState(User);
+  const [showModal, setShowModal] = useState(false)
 
   const reload = async () => {
     const result = await listUserApi();
     setUsers(result);
   };
 
+  const handleOpenModal = (u) => {
+    setShowModal(true);
+    setUser(u);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const eliminar = async(id)=>{
+    let result = await DeleteUSer(id)
+    if(result){
+      setUsers(users.filter(u=> u._id !== id));
+      Swal.fire({
+        icon: "success",
+        title: "Genial!",
+        text: "Se eliminó el usuario correctamente!",
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "No se pudo eliminar el usuario!",
+      });
+    }
+  }
+
   useEffect(() => {
     reload();
-    console.log(users);
-  }, []);
+    
+  }, [showModal]);
 
   return (
     <>
@@ -37,10 +69,10 @@ export const UserTable = () => {
                   <td>{userActual.email}</td>
                   <td>{userActual.rol}</td>
                   <td>
-                    <button className="btn btn-danger margen-button">
+                    <button className="btn btn-danger margen-button" onClick={()=>{eliminar(userActual._id)}}>
                       Eliminar
                     </button>
-                    <button className="btn btn-warning margen-button">
+                    <button className="btn btn-warning margen-button" onClick={()=>handleOpenModal(userActual)}>
                       Editar
                     </button>
                     <button className="btn btn-success">Ver</button>
@@ -50,6 +82,7 @@ export const UserTable = () => {
             })}
           </tbody>
         </table>
+        <UpdateUser userEdit={user} isOpen={showModal} onClose={()=>{handleCloseModal()}}></UpdateUser>
       </div>
     </>
   );
